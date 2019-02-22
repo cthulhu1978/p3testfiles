@@ -1,8 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <math.h>
 #include <pthread.h>
 
+
+int checkPrimes(int argc, char **argv);
 void* sub(void *arg);
 
 int shared_var;
@@ -10,6 +14,7 @@ pthread_mutex_t m;
 
 int main(int argc,char *argv[])
 {
+    alarm(90);
     int i, rc, ids[8];
     pthread_t thrdid[8];
 
@@ -30,6 +35,21 @@ int main(int argc,char *argv[])
     }
 
     printf("shared_var=%d\n",shared_var);
+
+    return 0;
+}
+int checkPrimes(int argc, char **argv)
+{
+    int val, i, n, r;
+
+    val = atoi(argv[1]);
+
+    for (i=2, r=sqrt((double) val);  (val % i) != 0  &&  i < r;  i++)
+        ;
+    if ( (val % i) != 0)
+       printf("%d is prime\n",val);
+    else
+       printf("%d is not prime\n",val);
 
     return 0;
 }
