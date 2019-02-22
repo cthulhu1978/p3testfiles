@@ -1,0 +1,63 @@
+
+                               Computer Systems
+                                  Project 3
+                                 Spring 2019
+
+
+turnin code: cs_p3
+
+
+Write a C program that uses pthreads to compute the number of prime
+numbers between multiple ranges of specified low and high values,
+inclusive.  Here is an example execution:
+
+    ./p3  3 103  1000 2000  3000 4000
+
+The first range is 3 through 103, the second is 1000 through 2000,
+and the third is 3000 through 4000, all inclusive.  You can assume that
+there will be no more than 4 ranges of values, implying that you will
+need to create no more than 4 threads.
+
+Note that you only count the total number of primes found in each range,
+and not the actual prime numbers themselves.
+
+The mainline program should NOT perform any of the computation.  Instead,
+it should create one pthread to examine each range.
+
+BE SURE TO HAVE THIS AS THE FIRST EXECUTABLE LINE IN YOUR PROGRAM:
+
+    alarm(90)
+
+Use time1 from timedemo.c in main to determine the amount of time between
+starting the threads and termination of all threads.
+
+The print should contain EXACTLY 1 LINE OF OUTPUT containing these values:
+    the total time
+    the total number of primes
+    the number of primes in range 1
+    the number of primes in range 2
+    etc
+
+An example print for the above test might be:
+
+    0.014   281  26   135    120
+
+where I just made up the 0.014 time.
+    
+
+As in prior projects, if the program is run with a single command-line arg
+of  -hw  then it should simply print   hello world   and exit(0).
+
+
+TURNIN info:
+    You should submit a tar file of a directory which contains all of the
+    required files (makefile, C source files, header files, etc).
+    Sample tar command to create a tar file from a dir:
+	tar cvf p3.tar ./p3dir  ## do *NOT* use full pathname of the dir
+    After un-tarring the project, I will cd to the dir containing it and type:
+        rm -rf p3
+        rm -f *.o
+        make
+    It should build an executable named p3 as described above.
+    Sample un-tar, build, and simple execution will be provided in the script
+    p3testfiles/PREP.py

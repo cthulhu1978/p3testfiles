@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo RMB  FILL THIS IN
+
+# use the *SAME* range so that all have same amount of work to do (about 1 sec)
+
+./p3  1000000 2200000  1000000 2200000  1000000 2200000
+
