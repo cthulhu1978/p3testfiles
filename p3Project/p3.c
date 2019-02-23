@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
+#include <stdbool.h>
+
+
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct prime_runner_struct{
@@ -62,24 +65,36 @@ int main(int argc,char *argv[])
 }
 void * checkPrimes(void * arg)
 {
-    struct prime_runner_struct * arg_struct = (struct prime_runner_struct *)arg;
-    int val, i, n, r;
-    arg_struct->low = low_values[thread_count];
-    printf("low low low %d\n", arg_struct->low );
-    arg_struct->high = high_values[thread_count];
-    printf("high high high  %d\n", arg_struct->high );
-
     pthread_mutex_lock(&mutex);
-    thread_count++;
-    pthread_mutex_unlock(&mutex);
-    i = arg_struct->low;
-    val = arg_struct->high;
+    int high_range, low_range, n, r;
 
-    for (r=sqrt((double) val);  (val % i) != 0  &&  i < r;  i++){
-    if ( (val % i) != 0)
-       printf("%d is prime\n",val);
-    else
-       printf("%d is not prime\n",val);
-     }
+    struct prime_runner_struct * arg_struct = (struct prime_runner_struct *)arg;
+    arg_struct->num_primes = 0;
+    arg_struct->low = low_values[thread_count];
+    arg_struct->high = high_values[thread_count];
+
+    thread_count++;
+
+    high_range = (int)arg_struct->high;
+    low_range = (int)arg_struct->low;
+
+    for (int i = high_range; i > low_range; i--) {
+      bool isPrime = true;
+      for (int j = 2; j < high_range; j++) {
+        if(i % j == 0 && i != j){
+            isPrime = false;
+            //printf("num is %d and mod is %d\n", i, j);
+          }
+        } // end inner for loop
+        if(isPrime == true){
+          printf("prime is %d\n", i);
+        }
+        isPrime = true;
+      } // end second for loop
+
+
+
+    pthread_mutex_unlock(&mutex);
+
     pthread_exit(0);
 }
