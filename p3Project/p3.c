@@ -14,7 +14,29 @@ pthread_mutex_t m;
 
 int main(int argc,char *argv[])
 {
+    // required
     alarm(90);
+    // how many args are presented:
+    int num_args = (argc-1) / 2;
+    int low_values[num_args];
+    int high_values[num_args];
+    for (int i = 0; i < num_args; i++) {
+      if(i % 2 == 0){
+        low_values[i] = atoi(argv[i + 1]);
+        printf("low values arguments -> %d, val in arg %d, at pos %d\n",low_values[i], atoi(argv[i+1]), i );
+      }
+    }
+    for (int j = 0; j < num_args; j++) {
+      if(j % 2 == 1) {
+        high_values[j] = atoi(argv[j + 1]);
+        printf("high values arguments -> %d, val in arg %d, at pos %d\n",high_values[j], atoi(argv[j+1]), j );
+      }
+    }
+printf("\n\n" );
+    for (size_t i = 0; i < num_args; i++) {
+      printf("arg at low: %d at pos %d\n",low_values[i], i );
+      printf("arg at high: %d at pos %d\n",high_values[i], i );
+    }
     int i, rc, ids[8];
     pthread_t thrdid[8];
 
