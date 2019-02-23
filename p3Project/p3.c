@@ -4,90 +4,82 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+struct prime_runner_struct{
+  int low;
+  int high;
+  int num_primes;
+};
 
-int checkPrimes(int argc, char **argv);
-void* sub(void *arg);
+int low_values[8];
+int high_values[8];
+int thread_count = 0;
 
-int shared_var;
-pthread_mutex_t m;
+void * checkPrimes(void * arg);
 
 int main(int argc,char *argv[])
 {
     // required
     alarm(90);
     // how many args are presented:
-    int num_args = (argc-1) / 2;
-    int low_values[num_args];
-    int high_values[num_args];
+    int num_args = (argc-1);
+    printf("num args %d\n\n", num_args);
+    // array for high and low vals.
+    int low_count = 0; int high_count = 0;
+    // put values in a high and low array:
     for (int i = 0; i < num_args; i++) {
       if(i % 2 == 0){
-        low_values[i] = atoi(argv[i + 1]);
-        printf("low values arguments -> %d, val in arg %d, at pos %d\n",low_values[i], atoi(argv[i+1]), i );
+        low_values[low_count] = atoi(argv[i + 1]);
+        low_count++;
+      } else if( i % 2 == 1){
+        high_values[high_count] = atoi(argv[i+1]);
+        high_count++;
       }
     }
-    for (int j = 0; j < num_args; j++) {
-      if(j % 2 == 1) {
-        high_values[j] = atoi(argv[j + 1]);
-        printf("high values arguments -> %d, val in arg %d, at pos %d\n",high_values[j], atoi(argv[j+1]), j );
-      }
-    }
-printf("\n\n" );
-    for (size_t i = 0; i < num_args; i++) {
-      printf("arg at low: %d at pos %d\n",low_values[i], i );
-      printf("arg at high: %d at pos %d\n",high_values[i], i );
-    }
-    int i, rc, ids[8];
-    pthread_t thrdid[8];
+    // create enough structs for the threads//
+    struct prime_runner_struct args[num_args];
+    // create needed threads
+    pthread_t thrdid[num_args];
 
-    pthread_mutex_init(&m, NULL);
+    int rc, ids[8];
 
-    shared_var = 0;
 
-    printf("I am unix process %d\n",getpid());
-    for (i=0; i < 3; i++)
+
+    //printf("I am unix process %d\n",getpid());
+    for (int i = 0; i < num_args/2; i++)
     {
-        ids[i] = i;
-        rc = pthread_create(&thrdid[i],NULL,sub,(void *)&ids[i]);
+        rc = pthread_create(&thrdid[i],NULL,checkPrimes,(void *)&args[i]);
     }
 
-    for (i=0; i < 3; i++)
+    for (int i=0; i < num_args/2; i++)
     {
         pthread_join(thrdid[i],NULL);
     }
 
-    printf("shared_var=%d\n",shared_var);
 
     return 0;
 }
-int checkPrimes(int argc, char **argv)
+void * checkPrimes(void * arg)
 {
+    struct prime_runner_struct * arg_struct = (struct prime_runner_struct *)arg;
     int val, i, n, r;
+    arg_struct->low = low_values[thread_count];
+    printf("low low low %d\n", arg_struct->low );
+    arg_struct->high = high_values[thread_count];
+    printf("high high high  %d\n", arg_struct->high );
 
-    val = atoi(argv[1]);
+    pthread_mutex_lock(&mutex);
+    thread_count++;
+    pthread_mutex_unlock(&mutex);
+    i = arg_struct->low;
+    val = arg_struct->high;
 
-    for (i=2, r=sqrt((double) val);  (val % i) != 0  &&  i < r;  i++)
-        ;
+    for (r=sqrt((double) val);  (val % i) != 0  &&  i < r;  i++){
     if ( (val % i) != 0)
        printf("%d is prime\n",val);
     else
        printf("%d is not prime\n",val);
-
-    return 0;
-}
-
-void* sub(void *arg)
-{
-    int i;
-
-    i = *( (int *)arg );
-    printf("I am thread %d in unix process %d\n",i, getpid());
-
-    for (i=0; i < 1000000; i++)
-    {
-        pthread_mutex_lock(&m);
-	shared_var += 2;
-        pthread_mutex_unlock(&m);
-        // sched_yield();
-    }
+     }
+    pthread_exit(0);
 }
