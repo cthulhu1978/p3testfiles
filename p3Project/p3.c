@@ -5,9 +5,8 @@
 #include <math.h>
 #include <pthread.h>
 #include <stdbool.h>
-#include <time.h>
-clock_t start,end;
-double cpu_time;
+#include <sys/time.h>
+#include <string.h>
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct prime_runner_struct{
@@ -16,6 +15,13 @@ struct prime_runner_struct{
   int num_primes;
 };
 
+double time1()
+{
+    struct timeval tv;
+    gettimeofday( &tv, ( struct timezone * ) 0 );
+    return ( (double) (tv.tv_sec + (tv.tv_usec / 1000000.0)) );
+}
+double timeStart, timeEnd;
 int low_values[8];
 int high_values[8];
 int thread_count = 0;
@@ -24,10 +30,13 @@ void * checkPrimes(void * arg);
 
 int main(int argc,char *argv[])
 {
-    // required
+    // required alarm
     alarm(180);
-    start = clock();
-    // how many args are presented:
+    timeStart = time1();
+    // check for args //
+    if(argc < 2){exit(0);}
+    if(strcmp(argv[1], "-hw") == 0) { printf("%s\n","Hello world" ); exit(0); }
+
     int num_args = (argc-1);
     // array for high and low vals.
     int low_count = 0; int high_count = 0;
@@ -49,31 +58,25 @@ int main(int argc,char *argv[])
     int rc;
 
     //printf("I am unix process %d\n",getpid());
-    for (int i = 0; i < num_args/2; i++)
-    {
-        rc = pthread_create(&thrdid[i],NULL,checkPrimes,(void *)&args[i]);
-    }
+    for (int i = 0; i < num_args/2; i++){rc = pthread_create(&thrdid[i],NULL,checkPrimes,(void *)&args[i]);}
 
-    for (int i=0; i < num_args/2; i++)
-    {
-        pthread_join(thrdid[i],NULL);
-    }
+    for (int i=0; i < num_args/2; i++) { pthread_join(thrdid[i],NULL);}
 
     int total_primes = 0;
     for (size_t i = 0; i < num_args/2; i++) { total_primes += args[i].num_primes; }
 
-    end = clock();
-    cpu_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("%f  ",cpu_time );
+    timeEnd = time1();
+    double cpu_time = (double)(timeEnd - timeStart);
+
+    printf("%.3lf     ",cpu_time );
     printf("%d",total_primes );
     for (size_t i = 0; i < num_args/2; i++) { printf(" %d", args[i].num_primes );}
     printf("\n");
-
-
     return 0;
 }
 void * checkPrimes(void * arg)
 {
+    //printf("thread num: %ld\n",pthread_self() );
     pthread_mutex_lock(&mutex);
     int high_range, low_range, n, r;
 

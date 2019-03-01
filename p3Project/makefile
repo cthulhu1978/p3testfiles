@@ -1,6 +1,6 @@
 #
-p2:     p3.c
-	cc -c p3.c
+p3:     p3.c
+	cc -c -g p3.c
 	cc -o p3 p3.o -lpthread -lm
 
 clean:
